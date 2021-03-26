@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace LAB_PP_2
 {
@@ -12,20 +13,26 @@ namespace LAB_PP_2
     {
         static void Main(string[] args)
         {
-            var json = File.ReadAllText(@"students.json");
-            List<Student> students = JsonConvert.DeserializeObject<List<Student>>(json);
+            load();
+            Console.Read();
+        }
 
-            foreach (var s in students)
-            {
-                Console.WriteLine(s.studentId + ":\t" + s.studentName);
-            }
+        public static async void load()
+        {
+            Console.WriteLine("Podaj datę [YYYY-MM-DD]: ");
+            string date = Console.ReadLine();
+            string call = "https://openexchangerates.org/api/historical/" + date + ".json?app_id=81c1723f53a04465aca559053eaa515a";
+            HttpClient httpclient = new HttpClient();
+            string json = await httpclient.GetStringAsync(call); 
+            currency cur = JsonConvert.DeserializeObject<currency>(json);
+            Console.WriteLine(cur.rates["PLN"]);
         }
 
     }
 
-    class Student
+    class currency
     { 
-        public int studentId { set; get; }
-        public string studentName { set; get; }
+        public string base_cur { set; get; }
+        public Dictionary<string, double> rates { get; set; }
     }
 }
